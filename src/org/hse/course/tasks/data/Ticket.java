@@ -1,6 +1,7 @@
 package org.hse.course.tasks.data;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * Интерфейс сущности Билет
@@ -72,10 +73,19 @@ public interface Ticket {
     interface TicketFactory {
 
         /**
+         * Возвращает функцию, конструирующую билеты по номеру
+         *
+         * @return функция, конструирующая билеты по номеру
+         */
+        Function<Integer, Ticket> getTicketSupplier();
+
+        /**
          * @param number номер билета
          * @return экзумпляр {@link Ticket}
          */
-        Ticket getInstance(int number);
+        default Ticket getInstance(int number) {
+            return getTicketSupplier().apply(number);
+        }
     }
 }
 
@@ -84,13 +94,9 @@ public interface Ticket {
  */
 class SixDigitsTicketFactoryImpl implements Ticket.TicketFactory {
 
-    /**
-     * @param number номер билета
-     * @return {@link SixDigitsTicketImpl}
-     */
     @Override
-    public Ticket getInstance(int number) {
-        return new SixDigitsTicketImpl(number);
+    public Function<Integer, Ticket> getTicketSupplier() {
+        return SixDigitsTicketImpl::new;
     }
 
     /**
@@ -125,8 +131,8 @@ class SixDigitsTicketFactoryImpl implements Ticket.TicketFactory {
 class EightDigitsFactoryImpl implements Ticket.TicketFactory {
 
     @Override
-    public Ticket getInstance(int number) {
-        return new EightDigitsTicketImpl(number);
+    public Function<Integer, Ticket> getTicketSupplier() {
+        return EightDigitsTicketImpl::new;
     }
 
     /**

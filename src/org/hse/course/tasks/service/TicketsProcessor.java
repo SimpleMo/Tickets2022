@@ -26,6 +26,7 @@ public interface TicketsProcessor {
 /**
  * Реализация {@link TicketsProcessor} для подсчёта количества шестизначных счастливых билетов
  */
+//todo дать задание на усовершенствование интерфейса TicketsProcessor по аналогии с Ticket и фабрикой билетов
 class SixDigitTicketsProcessorImpl implements TicketsProcessor {
     private static final int DIGITS_COUNT = 6;
 
