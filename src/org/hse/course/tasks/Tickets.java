@@ -2,9 +2,6 @@ package org.hse.course.tasks;
 
 import org.hse.course.tasks.service.TicketsProcessor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -21,25 +18,13 @@ public class Tickets {
      */
     public static void main(String[] args) {
         TicketsProcessor.getSixDigitsTicketProcessor().process();
-//        TicketsProcessor.getEightDigitsTicketProcessor().process();
-
-        Double d = Double.valueOf(10);
+        TicketsProcessor.getEightDigitsTicketProcessor().process();
 
         LambdaTest lambdaTest = new LambdaTest();
         lambdaTest.setData(9000);
 
-        /*Function<Double, String> func =
-                val -> {
-                    System.out.println(lambdaTest.getData());
-                    lambdaTest.data = 100500;
-
-                    return val.toString() + " " + staticDouble.toString() + " " + d.toString() + " " + lambdaTest.getData();
-                };*/
         Function<Double, String> func = Tickets::doubleToString;
 
-        // Tickets::testMethodReference;
-        // Tickets::testMethodReferenceWithParam;
-        // Runnable lambdaTestConstructor = LambdaTest::new;
         Consumer<Integer> integerConsumer = lambdaTest::setData;
         integerConsumer.accept(42);
 
