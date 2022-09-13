@@ -33,9 +33,11 @@ class SixDigitTicketsProcessorImpl implements TicketsProcessor {
     @Override
     public void process() {
         int result = 0;
+        CheckEvenVisitor checkEvenVisitor = new CheckEvenVisitor();
         Ticket.TicketFactory factory = Ticket.getSixDigitsTicketFactory();
         for(int number = 0; number < Math.pow(10, DIGITS_COUNT); number++) {
-            if (!factory.getInstance(number).isLucky()) {
+            Ticket ticket = factory.getInstance(number);
+            if (!ticket.isLucky() || !ticket.accept(checkEvenVisitor)) {
                 continue;
             }
 

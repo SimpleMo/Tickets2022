@@ -1,5 +1,7 @@
 package org.hse.course.tasks.data;
 
+import org.hse.course.tasks.service.Visitor;
+
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -66,6 +68,10 @@ public interface Ticket {
      * @return номер билета
      */
     int getNumber();
+
+    default <R> R accept(Visitor<Ticket, R> visitor) {
+        return visitor.visit(this);
+    }
 
     /**
      * Построитель экземпляров {@link Ticket}
