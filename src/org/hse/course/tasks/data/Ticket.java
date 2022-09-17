@@ -1,11 +1,25 @@
 package org.hse.course.tasks.data;
 
+import org.hse.course.tasks.service.Visitor;
+
 import java.util.Arrays;
 
 /**
  * Интерфейс сущности Билет
  */
 public interface Ticket {
+
+    /**
+     * Построитель экземпляров {@link Ticket}
+     */
+    interface TicketFactory {
+
+        /**
+         * @param number номер билета
+         * @return экзумпляр {@link Ticket}
+         */
+        Ticket getInstance(int number);
+    }
 
     /**
      * @return экземпляр {@link SixDigitsTicketFactoryImpl}
@@ -74,15 +88,14 @@ public interface Ticket {
     int getNumber();
 
     /**
-     * Построитель экземпляров {@link Ticket}
+     * Метод, принимающий посетителя
+     *
+     * @param visitor посетитель
+     * @param <R>     результат работы метода
+     * @return {@link R}
      */
-    interface TicketFactory {
-
-        /**
-         * @param number номер билета
-         * @return экзумпляр {@link Ticket}
-         */
-        Ticket getInstance(int number);
+    default <R> R accept(Visitor<Ticket, R> visitor) {
+        return visitor.visit(this);
     }
 }
 

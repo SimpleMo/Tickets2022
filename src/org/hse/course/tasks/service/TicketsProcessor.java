@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,48 +42,42 @@ public interface TicketsProcessor {
      */
     Integer getDigitsQuantity();
 
+    Supplier<Visitor<Ticket, Boolean>> getStrategy();
+    void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy);
+
     default Boolean testTicketByNumber(Integer number) {
-        return Optional
-                .ofNullable(number)
+        return getOptional(number)
                 .map(getTicketSupplier())
                 .map(Ticket::isLucky)
-//                .orElseThrow(() -> new IllegalArgumentException("Не могу работать в таких условиях! Что за null?!"));
                 .orElse(Boolean.FALSE);
+    }
+
+    static <T> Optional<T> getOptional(T t) {
+        if (t == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(t);
     }
 
     /**
      * Возвращает результат обработки
      */
     default void process() {
-        Predicate<Ticket> lucky = Ticket::isLucky;
         var rightExclusive = (int) Math.pow(10, getDigitsQuantity());
-        Stream<Integer> integerStream =
+
+        var visitor = getStrategy().get();
+
+        Predicate<Ticket> isLucky = Ticket::isLucky;
+        Predicate<Ticket> extraCondition = ticket -> ticket.accept(visitor);
+
+        var result =
                 IntStream
-                        .range(1, rightExclusive)
+                        .range(0, rightExclusive)
                         .parallel()
                         .mapToObj(getTicketSupplier()::apply)
-                        .filter(lucky)
-                        .map(Ticket::getNumber)
-                        .filter(num -> (num % 7) == 0);
-        var result = integerStream.reduce(rightExclusive, (acc, item) -> acc > item ? item : acc);
-        List<Integer> tickets =
-                IntStream
-                        .range(1, rightExclusive)
-                        .mapToObj(getTicketSupplier()::apply)
-                        .filter(lucky)
-                        .map(Ticket::getNumber)
-                        .filter(num -> (num % 7) == 0)
-                        .sorted(Integer::compareTo)
-                        .collect(Collectors.toList());
-
-        /*for(var number = 0; number < Math.pow(10, getDigitsQuantity()); number++) {
-            Predicate<Ticket> lucky = Ticket::isLucky;
-            if (Predicate.not(lucky).test(getTicketSupplier().apply(number))) {
-                continue;
-            }
-
-            result++;
-        }*/
+                        .filter(isLucky.and(extraCondition))
+                        .count();
 
         System.out.println(result);
     }
@@ -92,6 +87,7 @@ public interface TicketsProcessor {
  * Реализация {@link TicketsProcessor} для подсчёта количества шестизначных счастливых билетов
  */
 class SixDigitTicketsProcessorImpl implements TicketsProcessor {
+    private Supplier<Visitor<Ticket, Boolean>> strategy;
 
     @Override
     public Function<Integer, Ticket> getTicketSupplier() {
@@ -102,12 +98,25 @@ class SixDigitTicketsProcessorImpl implements TicketsProcessor {
     public Integer getDigitsQuantity() {
         return 6;
     }
+
+    @Override
+    public Supplier<Visitor<Ticket, Boolean>> getStrategy() {
+        return this.strategy;
+    }
+
+    @Override
+    public void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy) {
+        this.strategy = strategy;
+    }
+
 }
 
 /**
  * Реализация {@link TicketsProcessor} для подсчёта количества восьмизначных счастливых билетов
  */
 class EightDigitsTicketsProcessorImpl implements TicketsProcessor {
+
+    private Supplier<Visitor<Ticket, Boolean>> strategy;
 
     @Override
     public Function<Integer, Ticket> getTicketSupplier() {
@@ -118,12 +127,25 @@ class EightDigitsTicketsProcessorImpl implements TicketsProcessor {
     public Integer getDigitsQuantity() {
         return 8;
     }
+
+    @Override
+    public Supplier<Visitor<Ticket, Boolean>> getStrategy() {
+        return this.strategy;
+    }
+
+    @Override
+    public void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy) {
+        this.strategy = strategy;
+    }
+
 }
 
 /**
  * Реализация {@link TicketsProcessor} для подсчёта количества четырёхзначных счастливых билетов
  */
 class FourDigitsTicketsProcessorImpl implements TicketsProcessor {
+
+    private Supplier<Visitor<Ticket, Boolean>> strategy;
 
     @Override
     public Function<Integer, Ticket> getTicketSupplier() {
@@ -134,4 +156,15 @@ class FourDigitsTicketsProcessorImpl implements TicketsProcessor {
     public Integer getDigitsQuantity() {
         return 4;
     }
+
+    @Override
+    public Supplier<Visitor<Ticket, Boolean>> getStrategy() {
+        return this.strategy;
+    }
+
+    @Override
+    public void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy) {
+        this.strategy = strategy;
+    }
+
 }
