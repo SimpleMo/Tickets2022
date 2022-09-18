@@ -14,7 +14,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Обработчик билетов
+ * Обработчик билетов.
+ * Прошу обратить внимание: поменял методы getStrategy и setStrategy.
+ * В нашем случае достаточно Visitor в качестве Стратегии
  */
 public interface TicketsProcessor {
     /**
@@ -42,8 +44,9 @@ public interface TicketsProcessor {
      */
     Integer getDigitsQuantity();
 
-    Supplier<Visitor<Ticket, Boolean>> getStrategy();
-    void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy);
+    Optional<Visitor<Ticket, Boolean>> getStrategy();
+
+    void setStrategy(Visitor<Ticket, Boolean> strategy);
 
     default Boolean testTicketByNumber(Integer number) {
         return getOptional(number)
@@ -66,10 +69,10 @@ public interface TicketsProcessor {
     default void process() {
         var rightExclusive = (int) Math.pow(10, getDigitsQuantity());
 
-        var visitor = getStrategy().get();
+        var visitor = getStrategy();
 
         Predicate<Ticket> isLucky = Ticket::isLucky;
-        Predicate<Ticket> extraCondition = ticket -> ticket.accept(visitor);
+        Predicate<Ticket> extraCondition = ticket -> visitor.map(ticket::accept).orElse(true);
 
         var result =
                 IntStream
@@ -87,7 +90,7 @@ public interface TicketsProcessor {
  * Реализация {@link TicketsProcessor} для подсчёта количества шестизначных счастливых билетов
  */
 class SixDigitTicketsProcessorImpl implements TicketsProcessor {
-    private Supplier<Visitor<Ticket, Boolean>> strategy;
+    private Visitor<Ticket, Boolean> strategy;
 
     @Override
     public Function<Integer, Ticket> getTicketSupplier() {
@@ -100,12 +103,12 @@ class SixDigitTicketsProcessorImpl implements TicketsProcessor {
     }
 
     @Override
-    public Supplier<Visitor<Ticket, Boolean>> getStrategy() {
-        return this.strategy;
+    public Optional<Visitor<Ticket, Boolean>> getStrategy() {
+        return TicketsProcessor.getOptional(this.strategy);
     }
 
     @Override
-    public void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy) {
+    public void setStrategy(Visitor<Ticket, Boolean> strategy) {
         this.strategy = strategy;
     }
 
@@ -116,7 +119,7 @@ class SixDigitTicketsProcessorImpl implements TicketsProcessor {
  */
 class EightDigitsTicketsProcessorImpl implements TicketsProcessor {
 
-    private Supplier<Visitor<Ticket, Boolean>> strategy;
+    private Visitor<Ticket, Boolean> strategy;
 
     @Override
     public Function<Integer, Ticket> getTicketSupplier() {
@@ -129,12 +132,12 @@ class EightDigitsTicketsProcessorImpl implements TicketsProcessor {
     }
 
     @Override
-    public Supplier<Visitor<Ticket, Boolean>> getStrategy() {
-        return this.strategy;
+    public Optional<Visitor<Ticket, Boolean>> getStrategy() {
+        return TicketsProcessor.getOptional(this.strategy);
     }
 
     @Override
-    public void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy) {
+    public void setStrategy(Visitor<Ticket, Boolean> strategy) {
         this.strategy = strategy;
     }
 
@@ -145,7 +148,7 @@ class EightDigitsTicketsProcessorImpl implements TicketsProcessor {
  */
 class FourDigitsTicketsProcessorImpl implements TicketsProcessor {
 
-    private Supplier<Visitor<Ticket, Boolean>> strategy;
+    private Visitor<Ticket, Boolean> strategy;
 
     @Override
     public Function<Integer, Ticket> getTicketSupplier() {
@@ -158,12 +161,12 @@ class FourDigitsTicketsProcessorImpl implements TicketsProcessor {
     }
 
     @Override
-    public Supplier<Visitor<Ticket, Boolean>> getStrategy() {
-        return this.strategy;
+    public Optional<Visitor<Ticket, Boolean>> getStrategy() {
+        return TicketsProcessor.getOptional(this.strategy);
     }
 
     @Override
-    public void setStrategy(Supplier<Visitor<Ticket, Boolean>> strategy) {
+    public void setStrategy(Visitor<Ticket, Boolean> strategy) {
         this.strategy = strategy;
     }
 

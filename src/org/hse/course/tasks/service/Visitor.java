@@ -27,7 +27,7 @@ class EvenTicketVisitorFactory implements Visitor.Factory<Ticket, Boolean> {
         return new EvenTicketVisitorImpl();
     }
 
-    private class EvenTicketVisitorImpl implements Visitor<Ticket, Boolean> {
+    private static class EvenTicketVisitorImpl implements Visitor<Ticket, Boolean> {
 
         @Override
         public Boolean visit(Ticket item) {
